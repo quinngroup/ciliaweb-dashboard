@@ -3,7 +3,7 @@ import pandas as pd
 import json
 import os
 
-from bokeh.plotting import figure, output_file, save
+from bokeh.plotting import figure, output_file
 from bokeh.models import ColumnDataSource
 from bokeh.models.tools import HoverTool
 
@@ -37,21 +37,21 @@ args = {
 }
 st.sidebar.json(args)
 
-data = {'x_coords': [], 'y_coords': [], 'label': [], 'color': []}
-
+st.sidebar.markdown('### Colors')
 color_map = {
-    0: '#171614',
-    1: '#3AFF18',
-    2: '#754043',
-    3: '#9A8873',
-    4: '#DD423D',
-    5: '#547AA5',
-    6: '#50D8D7',
-    7: '#BBBDF6',
-    8: '#9893DA',
-    9: '#5398BE',
+    0: st.sidebar.beta_color_picker('0', '#171614'),
+    1: st.sidebar.beta_color_picker('1', '#3AFF18'),
+    2: st.sidebar.beta_color_picker('2', '#754043'),
+    3: st.sidebar.beta_color_picker('3', '#9A8873'),
+    4: st.sidebar.beta_color_picker('4', '#DD423D'),
+    5: st.sidebar.beta_color_picker('5', '#547AA5'),
+    6: st.sidebar.beta_color_picker('6', '#50D8D7'),
+    7: st.sidebar.beta_color_picker('7', '#BBBDF6'),
+    8: st.sidebar.beta_color_picker('8', '#9893DA'),
+    9: st.sidebar.beta_color_picker('9', '#5398BE')
 }
 
+data = {'x_coords': [], 'y_coords': [], 'label': [], 'color': []}
 with st.spinner('Loading data...'):
     mnist_generate(args)
     json_obj = read_json(output_path)
@@ -65,15 +65,13 @@ st.success('Data loaded successfully!')
 st.markdown('# Graph')
 data_source = ColumnDataSource(data)
 p = figure(title=f'MNIST Graph by {type_algorithm}', x_axis_label='x', y_axis_label='y')
-p.circle(x='x_coords', y='y_coords', line_width=3, source=data_source, color='color', legend='label')
+p.circle(x='x_coords', y='y_coords', line_width=3, source=data_source, color='color', legend_field='label')
 p.legend.location = 'top_right'
 
 hover = HoverTool()
 hover.tooltips = '''
-    <div>X: @x_coords</div>
-    <div>Y: @y_coords</div>
-    <div>Label: @label</div>
-    <div style="color: @color;">@color</div>
+    <div>(@x_coords, @y_coords)</div>
+    <div style="color: @color;">Digit: @label</div>
 '''
 p.add_tools(hover)
 st.bokeh_chart(p)
