@@ -37,10 +37,19 @@ args = {
 }
 st.sidebar.json(args)
 
-data = {
-    'x_coords': [],
-    'y_coords': [],
-    'label': []
+data = {'x_coords': [], 'y_coords': [], 'label': [], 'color': []}
+
+color_map = {
+    0: '#171614',
+    1: '#3AFF18',
+    2: '#754043',
+    3: '#9A8873',
+    4: '#DD423D',
+    5: '#547AA5',
+    6: '#50D8D7',
+    7: '#BBBDF6',
+    8: '#9893DA',
+    9: '#5398BE',
 }
 
 with st.spinner('Loading data...'):
@@ -50,18 +59,21 @@ with st.spinner('Loading data...'):
         data['x_coords'].append(entry['x'][0])
         data['y_coords'].append(entry['x'][1])
         data['label'].append(entry['y'])
+        data['color'].append(color_map[entry['y']])
 st.success('Data loaded successfully!')
 
 st.markdown('# Graph')
 data_source = ColumnDataSource(data)
 p = figure(title=f'MNIST Graph by {type_algorithm}', x_axis_label='x', y_axis_label='y')
-p.circle(x='x_coords', y='y_coords', line_width=3, source=data_source)
+p.circle(x='x_coords', y='y_coords', line_width=3, source=data_source, color='color', legend='label')
+p.legend.location = 'top_right'
 
 hover = HoverTool()
 hover.tooltips = '''
     <div>X: @x_coords</div>
     <div>Y: @y_coords</div>
     <div>Label: @label</div>
+    <div style="color: @color;">@color</div>
 '''
 p.add_tools(hover)
 st.bokeh_chart(p)
