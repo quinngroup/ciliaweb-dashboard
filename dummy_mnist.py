@@ -116,7 +116,7 @@ if __name__ == "__main__":
                             help = "Number of projected dimensions. [DEFAULT: 2]")
         parser.add_argument("--seed", type = int, default = 42,
                             help = "Random seed used for reproducibility. [DEFAULT: 42]")
-                
+
         parser.add_argument("-o", "--output", default = "output.json",
                             help = "Output file containing the embeddings and data. [DEFAULT: output.txt]")
 
@@ -125,4 +125,4 @@ if __name__ == "__main__":
 
         main(args)
 
-        
+
