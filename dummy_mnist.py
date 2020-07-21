@@ -25,12 +25,14 @@ import json
 #
 # Only dump the projection
 #
-def dumpProjectedJSON(X_proj, outfile, y = None):
+def dumpProjectedJSON(X_proj, outfile, y = None, idx = False):
         out = []
         for index, x_proj in enumerate(X_proj):
                 d = {"x": x_proj, "y": None}
                 if y is not None:
                         d["y"] = y[index]
+                if idx:
+                        d["idx"] = index
                 out.append(d)
 
         json.dump(out, open(outfile, "w"))
