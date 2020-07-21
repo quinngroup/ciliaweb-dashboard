@@ -1,7 +1,13 @@
+import streamlit as st
+import pandas as pd
+import json
+import os
+
 from bokeh.plotting import figure, output_file, save
 from bokeh.models import ColumnDataSource
 from bokeh.models.tools import HoverTool
-import json
+
+from dummy_mnist import main as mnist_generate
 
 
 def read_json(filename='output.json'):
@@ -13,39 +19,52 @@ def read_json(filename='output.json'):
         return json.load(json_file)
 
 
-def main():
-    '''
-    Generate a Bokeh chart based on a specified `.json` file
-    '''
-    json_obj = read_json()
-    data = {
-        'x_coords': [],
-        'y_coords': [],
-        'label': []
-    }
+st.sidebar.markdown('# Program Arguments')
+type_algorithm = st.sidebar.selectbox('type', ['pca', 'tsne', 'umap'])
+dimensions = st.sidebar.selectbox('dimensions', [2, 3])
+seed = st.sidebar.number_input('seed', value=42)
+output_path = os.path.join(
+    'output',
+    st.sidebar.text_input('output file', 'output.json')
+)
 
+st.sidebar.markdown('### Generated Arguments')
+args = {
+    'type': type_algorithm,
+    'dims': dimensions,
+    'seed': seed,
+    'output': output_path,
+}
+st.sidebar.json(args)
+
+data = {
+    'x_coords': [],
+    'y_coords': [],
+    'label': []
+}
+
+with st.spinner('Loading data...'):
+    mnist_generate(args)
+    json_obj = read_json(output_path)
     for entry in json_obj:
         data['x_coords'].append(entry['x'][0])
         data['y_coords'].append(entry['x'][1])
         data['label'].append(entry['y'])
+st.success('Data loaded successfully!')
 
-    data_source = ColumnDataSource(data)
+st.markdown('# Graph')
+data_source = ColumnDataSource(data)
+p = figure(title=f'MNIST Graph by {type_algorithm}', x_axis_label='x', y_axis_label='y')
+p.circle(x='x_coords', y='y_coords', line_width=3, source=data_source)
 
-    p = figure(title='proof of concept', x_axis_label='x', y_axis_label='y')
-    p.circle(x='x_coords', y='y_coords', line_width=3, source=data_source)
+hover = HoverTool()
+hover.tooltips = '''
+    <div>X: @x_coords</div>
+    <div>Y: @y_coords</div>
+    <div>Label: @label</div>
+'''
+p.add_tools(hover)
+st.bokeh_chart(p)
 
-    hover = HoverTool()
-    hover.tooltips = '''
-        <div>X: @x_coords</div>
-        <div>Y: @y_coords</div>
-        <div>Label: @label</div>
-    '''
-    p.add_tools(hover)
-
-    # save the results
-    output_file('output.html')
-    save(p)
-
-
-if __name__ == '__main__':
-    main()
+st.markdown('### Raw Data')
+st.dataframe(data, width=1200)

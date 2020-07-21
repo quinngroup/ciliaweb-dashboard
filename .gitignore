@@ -132,5 +132,4 @@ dmypy.json
 .vscode/
 
 # Output files
-output.html
-output.json
+output/
